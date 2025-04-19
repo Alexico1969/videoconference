@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Conference App</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/lib/jquery.min.js"></script>
+    <script src="js/app.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Video Conference</h1>
+        <div id="video-container">
+            <div class="video-wrapper">
+                <video id="localVideo" autoplay muted></video>
+                <label for="localVideo">Person 1</label>
+            </div>
+            <div class="video-wrapper">
+                <video id="remoteVideo1" autoplay></video>
+                <label for="remoteVideo1">Person 2</label>
+            </div>
+            <div class="video-wrapper">
+                <video id="remoteVideo2" autoplay></video>
+                <label for="remoteVideo2">Person 3</label>
+            </div>
+        </div>
+        <div class="controls">
+            <button id="startButton">Start Conference</button>
+            <button id="endButton">End Conference</button>
+        </div>
+    </div>
+</body>
+</html>
