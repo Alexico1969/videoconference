@@ -6,13 +6,16 @@
     <title>Video Conference App</title>
     <link rel="stylesheet" href="css/styles.css">
     <script src="js/lib/jquery.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.4.0/dist/peerjs.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
     <script src="js/app.js" defer></script>
 </head>
 <body>
     <div class="container">
         <h1>Video Conference</h1>
         <div id="video-container">
-            <div class="video-wrapper">
+            <div class="video-wrapper" id="wrapper-local">
                 <video id="localVideo" autoplay muted></video>
                 <label for="localVideo">Person 1</label>
                 <div class="video-controls">
@@ -21,7 +24,7 @@
                     <button class="default-btn">Default</button>
                 </div>
             </div>
-            <div class="video-wrapper">
+            <div class="video-wrapper" id="wrapper-remote1">
                 <video id="remoteVideo1" autoplay></video>
                 <label for="remoteVideo1">Person 2</label>
                 <div class="video-controls">
@@ -30,7 +33,7 @@
                     <button class="default-btn">Default</button>
                 </div>
             </div>
-            <div class="video-wrapper">
+            <div class="video-wrapper" id="wrapper-remote2">
                 <video id="remoteVideo2" autoplay></video>
                 <label for="remoteVideo2">Person 3</label>
                 <div class="video-controls">
