@@ -68,5 +68,24 @@ document.addEventListener("DOMContentLoaded", () => {
             // Toggle fullscreen for the clicked wrapper
             wrapper.classList.toggle("fullscreen");
         });
+
+        const biggerBtn = wrapper.querySelector(".bigger-btn");
+        const smallerBtn = wrapper.querySelector(".smaller-btn");
+        const defaultBtn = wrapper.querySelector(".default-btn");
+
+        // Ensure buttons exist before adding event listeners
+        if (biggerBtn && smallerBtn && defaultBtn) {
+            biggerBtn.addEventListener("click", () => {
+                wrapper.style.transform = "scale(2)"; // 200% size
+            });
+
+            smallerBtn.addEventListener("click", () => {
+                wrapper.style.transform = "scale(0.5)"; // 50% size
+            });
+
+            defaultBtn.addEventListener("click", () => {
+                wrapper.style.transform = "scale(1)"; // Reset to original size
+            });
+        }
     });
 });

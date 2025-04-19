@@ -113,3 +113,47 @@ button:active {
     height: auto;
     border: none;
 }
+
+.video-controls {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.video-controls button {
+    font-size: 14px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Specific colors for each button */
+.bigger-btn {
+    background-color: #28a745; /* Green */
+    color: white;
+}
+
+.bigger-btn:hover {
+    background-color: #218838;
+}
+
+.smaller-btn {
+    background-color: #ffc107; /* Yellow */
+    color: black;
+}
+
+.smaller-btn:hover {
+    background-color: #e0a800;
+}
+
+.default-btn {
+    background-color: #fd7e14; /* Orange */
+    color: white;
+}
+
+.default-btn:hover {
+    background-color: #e8590c;
+}
