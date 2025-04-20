@@ -81,41 +81,119 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById('remoteVideo1'),
         document.getElementById('remoteVideo2')
     ];
+    const joinButton = document.getElementById('joinButton');
+    const endButton = document.getElementById('endButton');
+    const roomIdInput = document.getElementById('roomId');
 
-    const peer = new Peer(); // Create a new PeerJS instance
+    const peerConnections = {};
+    const configuration = {
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+    };
+
     let localStream;
 
     // Get local media stream
     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     localVideo.srcObject = localStream;
 
-    // Handle incoming calls
-    peer.on('call', call => {
-        call.answer(localStream); // Answer the call with your local stream
-        call.on('stream', remoteStream => {
-            // Display the remote stream in an available video element
+    // Join a room
+    joinButton.addEventListener('click', () => {
+        const roomId = roomIdInput.value.trim();
+        if (!roomId) {
+            alert('Please enter a room ID');
+            return;
+        }
+
+        const roomRef = database.ref(`rooms/${roomId}`);
+
+        // Listen for new participants
+        roomRef.on('child_added', async snapshot => {
+            const { type, sdp, candidate, peerId } = snapshot.val();
+
+            if (type === 'offer') {
+                const peerConnection = new RTCPeerConnection(configuration);
+                peerConnections[peerId] = peerConnection;
+
+                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+                peerConnection.onicecandidate = event => {
+                    if (event.candidate) {
+                        roomRef.push({
+                            type: 'candidate',
+                            candidate: event.candidate,
+                            peerId: peer.id
+                        });
+                    }
+                };
+
+                peerConnection.ontrack = event => {
+                    const remoteVideo = remoteVideos.find(video => !video.srcObject);
+                    if (remoteVideo) {
+                        remoteVideo.srcObject = event.streams[0];
+                    }
+                };
+
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+
+                roomRef.push({
+                    type: 'answer',
+                    sdp: answer,
+                    peerId: peer.id
+                });
+            } else if (type === 'answer') {
+                const peerConnection = peerConnections[peerId];
+                if (peerConnection) {
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
+                }
+            } else if (type === 'candidate') {
+                const peerConnection = peerConnections[peerId];
+                if (peerConnection) {
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                }
+            }
+        });
+
+        // Add your own offer to the room
+        const peerConnection = new RTCPeerConnection(configuration);
+        peerConnections[peer.id] = peerConnection;
+
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+        peerConnection.onicecandidate = event => {
+            if (event.candidate) {
+                roomRef.push({
+                    type: 'candidate',
+                    candidate: event.candidate,
+                    peerId: peer.id
+                });
+            }
+        };
+
+        peerConnection.ontrack = event => {
             const remoteVideo = remoteVideos.find(video => !video.srcObject);
             if (remoteVideo) {
-                remoteVideo.srcObject = remoteStream;
+                remoteVideo.srcObject = event.streams[0];
             }
+        };
+
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+
+        roomRef.push({
+            type: 'offer',
+            sdp: offer,
+            peerId: peer.id
         });
     });
 
-    // Start a call
-    document.getElementById('startButton').addEventListener('click', () => {
-        const remotePeerId = prompt('Enter the ID of the peer to call:');
-        const call = peer.call(remotePeerId, localStream);
-        call.on('stream', remoteStream => {
-            const remoteVideo = remoteVideos.find(video => !video.srcObject);
-            if (remoteVideo) {
-                remoteVideo.srcObject = remoteStream;
-            }
-        });
-    });
-
-    // Display your PeerJS ID
-    peer.on('open', id => {
-        alert(`Your PeerJS ID is: ${id}`);
+    // End the conference
+    endButton.addEventListener('click', () => {
+        Object.values(peerConnections).forEach(pc => pc.close());
+        peerConnections = {};
+        database.ref(`rooms/${roomIdInput.value.trim()}`).off();
+        remoteVideos.forEach(video => (video.srcObject = null));
     });
 
     const videoWrappers = document.querySelectorAll(".video-wrapper");
