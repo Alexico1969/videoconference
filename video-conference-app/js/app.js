@@ -97,7 +97,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     localVideo.srcObject = localStream;
 
     // Join a room
-    joinButton.addEventListener('click', () => {
+    joinButton.addEventListener('click', async () => {
         const roomId = roomIdInput.value.trim();
         if (!roomId) {
             alert('Please enter a room ID');
